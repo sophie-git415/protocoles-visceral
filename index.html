@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Protocoles Chirurgie Viscérale</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #faf8f5;
+  --surface: #ffffff;
+  --border: #e8e2d9;
+  --text: #1a1612;
+  --muted: #7a7268;
+  --accent: #8b3a3a;
+  --accent-light: #f5ebe8;
+  --accent2: #3a6b5a;
+  --accent2-light: #e8f2ee;
+  --yellow: #f0e6c8;
+  --yellow-dark: #8a7040;
+  --purple: #6b5b8a;
+  --purple-light: #f0ecf8;
+  --radius: 12px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+header {
+  background: var(--accent);
+  color: white;
+  padding: 1.5rem 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+header h1 { font-family: 'DM Serif Display', serif; font-size: 1.4rem; font-weight: 400; }
+header span { font-size: 0.8rem; opacity: 0.75; margin-top: 2px; display: block; }
+.header-icon { font-size: 2rem; }
+
+.container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+
+.search-box {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+}
+.search-box input {
+  border: none;
+  outline: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 1rem;
+  flex: 1;
+  background: transparent;
+  color: var(--text);
+}
+.search-box input::placeholder { color: var(--muted); }
+.search-icon { color: var(--muted); font-size: 1.1rem; }
+
+.tabs {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+}
+.tab {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.tab:hover { border-color: var(--accent); color: var(--accent); }
+.tab.active { background: var(--accent); border-color: var(--accent); color: white; }
+
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem; }
+
+.card {
+  background: var(--surface);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  cursor: pointer;
+  transition: all 0.18s;
+  position: relative;
+  overflow: hidden;
+}
+.card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 6px 20px rgba(139,58,58,0.1); }
+.card-tag {
+  display: inline-block;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 4px;
+  margin-bottom: 0.6rem;
+}
+.tag-digestive { background: var(--accent-light); color: var(--accent); }
+.tag-bariatrique { background: var(--yellow); color: var(--yellow-dark); }
+.tag-pansement { background: var(--accent2-light); color: var(--accent2); }
+.tag-autre { background: var(--purple-light); color: var(--purple); }
+
+.card h3 { font-size: 1rem; font-weight: 600; margin-bottom: 0.4rem; color: var(--text); }
+.card p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+.card-arrow { position: absolute; right: 1.25rem; top: 50%; transform: translateY(-50%); color: var(--border); font-size: 1.1rem; }
+
+/* Modal */
+.modal-bg {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 100;
+  align-items: flex-start;
+  justify-content: center;
+  padding: 2rem 1rem;
+  overflow-y: auto;
+}
+.modal-bg.open { display: flex; }
+.modal {
+  background: var(--surface);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 680px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  margin: auto;
+}
+.modal-header {
+  background: var(--accent);
+  color: white;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.modal-header h2 { font-family: 'DM Serif Display', serif; font-size: 1.3rem; font-weight: 400; }
+.modal-close { background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.modal-close:hover { background: rgba(255,255,255,0.35); }
+.modal-body { padding: 1.5rem; }
+
+.section-block {
+  margin-bottom: 1.25rem;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.section-block-header {
+  padding: 0.65rem 1rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.block-preop { background: var(--accent-light); color: var(--accent); }
+.block-realim { background: var(--accent2-light); color: var(--accent2); }
+.block-lever { background: var(--yellow); color: var(--yellow-dark); }
+.block-surv { background: var(--purple-light); color: var(--purple); }
+.block-pst { background: #e8f4fb; color: #1a5a8a; }
+
+.section-block-body { padding: 0.85rem 1rem; font-size: 0.875rem; line-height: 1.7; color: var(--text); }
+.section-block-body ul { padding-left: 1.1rem; }
+.section-block-body li { margin-bottom: 0.25rem; }
+.section-block-body .jour { display: inline-block; font-weight: 600; color: var(--accent); min-width: 32px; }
+
+.alim-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); gap: 0.5rem; margin-top: 0.5rem; }
+.alim-cell { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 0.5rem; text-align: center; }
+.alim-cell .alim-jour { font-size: 0.7rem; font-weight: 600; color: var(--muted); text-transform: uppercase; }
+.alim-cell .alim-val { font-size: 0.82rem; font-weight: 500; color: var(--text); margin-top: 2px; }
+
+.add-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.65rem 1.25rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1.5rem;
+  transition: background 0.15s;
+}
+.add-btn:hover { background: #7a2f2f; }
+
+.add-form { background: var(--surface); border: 1.5px solid var(--accent); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; display: none; }
+.add-form.open { display: block; }
+.add-form h3 { font-size: 0.95rem; font-weight: 600; margin-bottom: 1rem; color: var(--accent); }
+.form-row { margin-bottom: 0.85rem; }
+.form-row label { display: block; font-size: 0.8rem; font-weight: 500; color: var(--muted); margin-bottom: 0.3rem; }
+.form-row input, .form-row textarea, .form-row select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 0.55rem 0.75rem;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 0.875rem;
+  color: var(--text);
+  background: var(--bg);
+  outline: none;
+  transition: border 0.15s;
+}
+.form-row input:focus, .form-row textarea:focus { border-color: var(--accent); }
+.form-row textarea { height: 80px; resize: vertical; }
+.form-actions { display: flex; gap: 0.75rem; margin-top: 1rem; }
+.btn-save { background: var(--accent); color: white; border: none; border-radius: 8px; padding: 0.55rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; cursor: pointer; font-weight: 500; }
+.btn-cancel { background: var(--bg); color: var(--muted); border: 1px solid var(--border); border-radius: 8px; padding: 0.55rem 1.25rem; font-family: 'DM Sans', sans-serif; font-size: 0.875rem; cursor: pointer; }
+
+.empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+.empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+
+.badge-custom { background: var(--purple-light); color: var(--purple); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-icon">🏥</div>
+  <div>
+    <h1>Protocoles Chirurgie Viscérale</h1>
+    <span>Clinique François Chénieux · Service US6 Gastro/Viscéral</span>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="search-box">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" placeholder="Rechercher une pathologie... ex: colectomie, sleeve, hernie..." oninput="filterCards()">
+  </div>
+
+  <div class="tabs">
+    <div class="tab active" onclick="filterTab('tous', this)">Toutes</div>
+    <div class="tab" onclick="filterTab('digestive', this)">Digestive</div>
+    <div class="tab" onclick="filterTab('bariatrique', this)">Bariatrique</div>
+    <div class="tab" onclick="filterTab('pansement', this)">Pansements</div>
+    <div class="tab" onclick="filterTab('autre', this)">Autre</div>
+  </div>
+
+  <button class="add-btn" onclick="toggleAddForm()">
+    <span>+</span> Ajouter un protocole
+  </button>
+
+  <div class="add-form" id="addForm">
+    <h3>Nouveau protocole</h3>
+    <div class="form-row">
+      <label>Nom de la pathologie *</label>
+      <input type="text" id="newName" placeholder="ex: Gastrectomie totale">
+    </div>
+    <div class="form-row">
+      <label>Catégorie</label>
+      <select id="newCat">
+        <option value="digestive">Chirurgie digestive</option>
+        <option value="bariatrique">Bariatrique</option>
+        <option value="pansement">Pansement</option>
+        <option value="autre">Autre</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <label>Résumé court</label>
+      <input type="text" id="newSummary" placeholder="ex: Anesthésie générale, RAAC">
+    </div>
+    <div class="form-row">
+      <label>Pré-opératoire (J-1)</label>
+      <textarea id="newPreop" placeholder="Préparation veille, régime, jeûne..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>Réalimentation (J0 → J3+)</label>
+      <textarea id="newRealim" placeholder="J0: AJ · J1: normal léger · J2: normal..."></textarea>
+    </div>
+    <div class="form-row">
+      <label>1er lever / RAD</label>
+      <input type="text" id="newLever" placeholder="ex: J1 avec aide, RAD à J2">
+    </div>
+    <div class="form-row">
+      <label>Points clés AS / Surveillance</label>
+      <textarea id="newSurv" placeholder="Drains, biologie, pansements, stomie..."></textarea>
+    </div>
+    <div class="form-actions">
+      <button class="btn-save" onclick="saveProtocol()">Enregistrer</button>
+      <button class="btn-cancel" onclick="toggleAddForm()">Annuler</button>
+    </div>
+  </div>
+
+  <div class="grid" id="cardsGrid"></div>
+</div>
+
+<div class="modal-bg" id="modalBg" onclick="closeModal(event)">
+  <div class="modal" id="modal">
+    <div class="modal-header">
+      <h2 id="modalTitle"></h2>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+const PROTOCOLS = [
+  {
+    id: 1, name: "VB / App / HO / HLB / EVE", cat: "digestive",
+    summary: "Régime normal J-1, RAAC selon chirurgien",
+    preop: "• Régime normal la veille\n• VB/App : à confirmer par le chirurgien avant J1\n• Jeûne solides 6h, liquides 2h avant\n• Douche antiseptique",
+    realim: "J-1: Normal\nJ0: AJ ou PPO retour bloc\nJ1: Normal léger\nJ2: Normal\nJ3: Normal",
+    lever: "RAAC J0 → J1 → J2 selon protocole",
+    surv: "• Surveillance transit\n• Douleur EVA\n• Plaies de cœlioscopie\n• Biologie à J3 si RAAC"
+  },
+  {
+    id: 2, name: "HH (Hernie Hiatale)", cat: "digestive",
+    summary: "Anesthésie générale, réalimentation progressive",
+    preop: "• Régime normal la veille\n• Jeûne solides 6h, liquides 2h avant\n• Douche antiseptique\n• Bas de contention",
+    realim: "J-1: Normal\nJ0: AJ / PPO le soir\nJ1: 6h: 2 desserts / 12h: PPO / 16h: léger mixé\nJ2: Normal léger mixé\nJ3: Normal léger mixé",
+    lever: "RAAC J0 → J1 → J2",
+    surv: "• Dysphagie post-op fréquente et normale\n• Douleur épaule (irritation diaphragme)\n• Nausées/vomissements → alerter\n• Position demi-assise"
+  },
+  {
+    id: 3, name: "Colectomie / Rectum / RC", cat: "digestive",
+    summary: "Régime sans résidus J-1, RAAC si protocole",
+    preop: "• Régime normal sans résidus la veille\n• Lavement si prescrit\n• Jeûne solides 6h, liquides 2h avant\n• Anesthésie générale + KTO\n• Si RAAC : suivre protocole RAAC\n• Si stomie : stomathérapeute en préop pour repérage",
+    realim: "J-1: Normal sans résidus\nJ0: AJ / retour bloc\nJ1: RAAC J1\nJ2: RAAC J2\nJ3: RAAC J3",
+    lever: "RAAC J1 · Aide AS obligatoire",
+    surv: "• Surveillance transit (gaz, selles)\n• Biologie à J3\n• RAD J3 si CRP <150\n• Stomie éventuelle → stomathérapeute\n• Plaies de cœlioscopie\n• SUCO en post-op systématique"
+  },
+  {
+    id: 4, name: "Sleeve / PP (pour EC/TR)", cat: "bariatrique",
+    summary: "Anesthésie générale, TOGD J2 systématique",
+    preop: "• PPO (Pré-op Bariatrique)\n• Anesthésie générale\n• Dépilation tondeuse + douche bétadine scrub veille et matin\n• Perfusion selon prescription",
+    realim: "J-1: PPO\nJ0: AJ\nJ1: 8h PPO / 12h: Normal léger\nJ2: RAAC J2 / TOGD systématique à J2\nJ3: P chir baria (demi bol potage + verrine yaourt/compote)",
+    lever: "RAAC J1 · Lever précoce obligatoire (prévention TVP)",
+    surv: "• TOGD à J2 systématique (patient prêt à 8h)\n• Drain abdo + redon aspiratif → ablation selon résultats TOGD\n• Csl diet automatique avant sortie\n• Plaies de cœlioscopie\n• Surveillance fuite anastomotique (T°, tachycardie)"
+  },
+  {
+    id: 5, name: "Sleeve / BP pour MS (Médecine Sportive)", cat: "bariatrique",
+    summary: "Anesthésie générale, TOGD J2 (Sleeve) ou J3 (BP)",
+    preop: "• Anesthésie générale\n• Perfusion selon prescription (non prescrite par l'anesthésiste en systématique)\n• Dépilation tondeuse + douche bétadine scrub\n• Réalimentation selon protocole",
+    realim: "J-1: Normal\nJ0: AJ\nJ1: AJ\nJ2: AJ (Sleeve: TOGD J2) / AJ (BP: TOGD J3)\nJ3: P chir baria S-liq (8h) / 12h: P chir baria S-liq TOGD + verrine yaourt compote",
+    lever: "RAAC J1 avec aide",
+    surv: "• TOGD J2 (Sleeve) ou J3 (Bypass) systématique et automatique\n• Drain abdo systématique\n• Csl diet systématique avant sortie\n• Si sortie vendredi/veille férié : TOGD le vendredi soir"
+  },
+  {
+    id: 6, name: "Sigmoïdite", cat: "digestive",
+    summary: "Médical : AJ jusqu'à consignes contraires",
+    preop: "• AJ jusqu'à consignes contraires\n• Régime sans résidus pour majorité des cas à la reprise alimentaire\n• Perfusion selon prescription\n• Antibiothérapie selon prescription\n• Biologie souvent toutes les 48h",
+    realim: "Réalimentation à la demande du chirurgien\nRégime sans résidus à la reprise\nFractionné si nécessaire",
+    lever: "RAD en fonction de l'évolution et consignes du chir",
+    surv: "• Pas d'intervention chirurgicale sauf urgence\n• Surveiller douleurs abdominales\n• Biologie fréquente"
+  },
+  {
+    id: 7, name: "DPC / Splénopancréatectomie / Pancréatectomie totale", cat: "digestive",
+    summary: "RAAC, entrée J0 matin, surveillance glycémies ++",
+    preop: "• Protocole RAAC : entrée J0 matin sauf CI\n• Anesthésie générale\n• Perfusion sur prescription médicale\n• Post-opératoire immédiat aux SUCO\n• Présence de drainage à type de lames",
+    realim: "J0: SUCO\nJ1-J3: Selon protocole\nJ3+: Réalimentation progressive selon tolérance",
+    lever: "J1 avec aide AS · Kiné respiratoire + Triflow systématique",
+    surv: "• Surveillance glycémies pré et post-prandial\n• PSE insuline en post-op immédiat\n• Biologie J1, J3, J5\n• ScanAP entre J5-J7\n• Lipase sur drainage J3 et J5\n• Triflow systématique\n• ETP glycémie si pancréatectomie totale"
+  },
+  {
+    id: 8, name: "Hépatectomie / Foie", cat: "digestive",
+    summary: "RAAC, entrée J0, biologie J1/J3/J5",
+    preop: "• Protocole RAAC : entrée J0 matin\n• Anesthésie générale\n• Perfusion sur prescription médicale\n• Post-op immédiat aux SUCO\n• Plaie transverse sous costale\n• Absence de ceinture abdominale",
+    realim: "J0: SUCO\nJ1+: Réalimentation selon protocole",
+    lever: "J1 avec aide · Kiné respiratoire + Triflow systématique",
+    surv: "• Biologie systématique J1, J3, J5\n• Surveillance diurèse systématique\n• Kiné respiratoire + Triflow\n• Plaie transverse sous costale"
+  },
+  {
+    id: 9, name: "HO / EVE / HLB (Hernie ombilicale/éventration/ligne blanche)", cat: "digestive",
+    summary: "Anesthésie générale, RAD lendemain",
+    preop: "• Anesthésie générale\n• Perfusion selon prescription\n• Réalimentation selon protocole\n• Plaie de laparo pour éventrations et hernie ligne blanche\n• Plaie de cœlioscopie pour hernies ombilicales",
+    realim: "J-1: Normal\nJ0: Normal léger retour bloc\nJ1: Normal\nJ2: Normal\nJ3: Normal",
+    lever: "RAD lendemain (sauf MS et si drainage) · Revoir autorisation lever avec chir",
+    surv: "• Pst compressif pour HO + HLB pour MS (retirer à J2 à sa demande)\n• Ceinture abdominale pour DB/MS/GL/EC\n• Surveillance hématome/sérome"
+  },
+  {
+    id: 10, name: "Hémorroïdes / Fissure anale / Fistule anale", cat: "digestive",
+    summary: "Rachianesthésie, RAD lendemain",
+    preop: "• Anesthésie par rachianesthésie\n• KTO\n• Réalimentation selon protocole\n• RAD le lendemain de l'intervention",
+    realim: "J-1: Normal\nJ0: Normal léger retour bloc\nJ1: Normal\nJ2: Normal",
+    lever: "RAD lendemain · Si compressif : attendre consignes chir",
+    surv: "• Si présence d'une mèche : ne pas toucher sauf consigne chir\n• Pour hémorroïdectomie : prescription laxatifs dès lendemain\n• Douleur anale : antalgique 1h avant pansement"
+  },
+  {
+    id: 11, name: "KSC (Kyste sinus coccygien)", cat: "digestive",
+    summary: "Rachianesthésie, pansement avec mèchage",
+    preop: "• Anesthésie par rachianesthésie\n• KTO\n• Réalimentation selon protocole",
+    realim: "J0: Normal retour bloc\nJ1+: Normal",
+    lever: "RAD lendemain sauf si VAC ou demande chir",
+    surv: "• Douche avant réfection pansement\n• Si mèchage : antalgique 1h avant pansement\n• Réfection J1 : si fermée → pst secondaire ; si ouverte → changer mèche + pst secondaire\n• Mèchage par algostéril (risque saignement)\n• Pour EC : si lambeau → RAD avec redons"
+  },
+  {
+    id: 12, name: "Hernie inguinale / crurale", cat: "digestive",
+    summary: "Rachianesthésie, RAD lendemain",
+    preop: "• Anesthésie par rachianesthésie\n• KTO\n• Réalimentation selon protocole (sauf si étranglée/résection)",
+    realim: "J-1: Normal\nJ0: Normal léger retour bloc\nJ1: Normal\nJ2: Normal",
+    lever: "RAD lendemain · Douche avant pansement",
+    surv: "• Plaies de cœlioscopie : retirer à J1, laisser à l'air\n• Si plaie inguinale : réfection J1 en la couvrant\n• Douleur pli inguinal"
+  },
+  {
+    id: 13, name: "Cholécystectomie", cat: "digestive",
+    summary: "Anesthésie générale, TOGD si indication",
+    preop: "• Anesthésie générale\n• Perfusion selon prescription\n• Réalimentation selon consigne du chir\n• Plaies de cœlioscopie",
+    realim: "J-1: Normal\nJ0: Normal léger retour bloc\nJ1: Normal\nJ2: Normal",
+    lever: "RAD lendemain si absence drainage",
+    surv: "• Si symptomatologie : antibiothérapie 3x/j (Augmentin sauf allergie)\n• Si drainage : surveiller aspect liquide ; si billeux + douleurs → appel chir direct\n• Plaies de cœlioscopie"
+  },
+  {
+    id: 14, name: "Appendicectomie", cat: "digestive",
+    summary: "Anesthésie générale, RAD selon chir",
+    preop: "• Anesthésie générale\n• Perfusion selon prescription\n• Souvent en urgence : jeûne immédiat\n• Antibiothérapie selon prescription",
+    realim: "J0: Réalimentation selon consignes du chir\nJ1+: Normal progressif",
+    lever: "RAD selon consignes du chir",
+    surv: "• Plaies de cœlioscopie\n• Antibiothérapie selon prescription\n• Surveillance T° (risque abcès)"
+  },
+  {
+    id: 15, name: "Thyroïdectomie partielle / totale", cat: "digestive",
+    summary: "Anesthésie générale, surveiller calcémie",
+    preop: "• Anesthésie générale\n• KTO\n• Réalimentation selon protocole",
+    realim: "J-1: Normal\nJ0: Normal retour bloc\nJ1: Normal\nJ2: Normal",
+    lever: "RAD lendemain si biologie ok",
+    surv: "• Surveiller fourmillements aux extrémités et visage ++\n• Biologie avec calcémie à J1\n• Réfection pansement à J1\n• Plaie niveau cervicale"
+  },
+  {
+    id: 16, name: "Dermolipectomie", cat: "bariatrique",
+    summary: "Entrée veille, repos lit strict J2, RAD J7",
+    preop: "• Entrée veille en hospitalisation (surveillance douche pré-op)\n• KTO\n• Réalimentation selon protocole\n• Repos au lit strict jusqu'à J2",
+    realim: "J-1: Normal\nJ0: Normal léger retour bloc\nJ1: Normal léger mixé\nJ2: Normal léger mixé\nJ3: Normal léger mixé",
+    lever: "Lev strict pour WC à partir de J2 · RAD à J7",
+    surv: "• SV à retirer sur prescription médicale à J2\n• Compressif en place jusqu'à J3 (ne pas toucher)\n• Réfection pst plaie de dermo à J3 et J7\n• 4 redons aspiratifs\n• Ceinture abdominale + panty le jour de la sortie\n• BAV"
+  },
+  {
+    id: 17, name: "Rectopexie", cat: "digestive",
+    summary: "Entrée veille, lavement, RAD J3",
+    preop: "• Entrée veille dans le service\n• Lavement + préparation colique selon prescription médicale\n• Alimentation sans résidus en pré-op\n• KTO\n• Réalimentation selon protocole",
+    realim: "J-1: Normal\nJ0: AJ\nJ1: Normal léger\nJ2: Normal\nJ3: Normal",
+    lever: "RAD à J3 · Plaies de cœlioscopie",
+    surv: "• Surveillance transit\n• Plaies cœlioscopie"
+  },
+  {
+    id: 18, name: "Amputation abdominopérinéale", cat: "digestive",
+    summary: "Stomie définitive, stomathérapeute quotidienne",
+    preop: "• Entrée veille de l'intervention\n• Si protocole RAAC : suivre protocole\n• Régime sans résidus en pré-op\n• SUCO post-op, pas de durée pré établie\n• Perfusion selon prescription",
+    realim: "Réalimentation à la demande du chir selon protocole",
+    lever: "RAD à la demande du chir",
+    surv: "• Stomie définitive : passage stomathérapeute quotidien\n• ETP pour vidanger la poche\n• Plaie périnéale\n• Redon niveau périnéal\n• Biologie à J3"
+  },
+  {
+    id: 19, name: "Colostomie / Iléostomie de décharge", cat: "digestive",
+    summary: "Régime sans résidus, appareillage J1",
+    preop: "• Si intervention programmée : prévenir stomathérapeute pour repérage\n• Régime sans résidus en pré-op\n• KTO",
+    realim: "Réalimentation selon protocole",
+    lever: "RAD en fonction consignes chir",
+    surv: "• SUCO en post-op (iléostomie seulement, pas colostomie)\n• Plaies cœlioscopie et/ou autour stomie\n• Appareillage stomie à J1 (voir photos protocole)\n• ETP vidange poche par équipe soignante\n• Diurèse si iléostomie"
+  },
+  {
+    id: 20, name: "Protocoles pansements — Plaies chirurgicales", cat: "pansement",
+    summary: "Cœlioscopie J1, autres plaies J1 + douche savon",
+    preop: "N/A",
+    realim: "N/A",
+    lever: "N/A",
+    surv: "• Plaies cœlioscopie : retirés à J1, patient envoyé douche eau et savon\n• Autres plaies chirurgicales : retirés à J1, nettoyage eau/savon sous douche\n• Si écoulement/saignement : couvrir avec pansement adapté\n• Plaie de dermo : retrait compressif à J3 ; réfection complète avec chlorhex + leukomed\n• NB : gel du pst doit être sur la plaie\n• Orifices redons : refaire tous les jours avec chlorhex + mepilex"
+  },
+  {
+    id: 21, name: "Protocoles pansements — Méchage / VAC", cat: "pansement",
+    summary: "Mèches changées/j, VAC 2x/semaine",
+    preop: "N/A",
+    realim: "N/A",
+    lever: "N/A",
+    surv: "• Mèches changées tous les jours (ou 2x/j si très exsudative)\n• Détersion au sérum phy sauf demande particulière\n• Mèche aquacel sauf demande particulière (ex: algostéril KSC EC)\n• Pansement VAC : 2 fois par semaine\n• VAC : pression prescrite par chirurgien référent\n• Commande matériel VAC par cadre auprès d'ALAIR\n• Anticiper pour le week-end"
+  },
+  {
+    id: 22, name: "Protocoles pansements — Drains / Sondes", cat: "pansement",
+    summary: "Drains biliaires, sonde gastrostomie/jéjunostomie",
+    preop: "N/A",
+    realim: "N/A",
+    lever: "N/A",
+    surv: "• Sonde gastrostomie : détersion chlorhex J1→J10 puis sérum phy quotidien\n• Mobilisation colerette et sonde tous les jours\n• Sonde jéjunostomie : détersion chlorhex J1→J10 puis sérum phy\n• Drain biliaire non clampé : détersion chlorhex + changement poche tous les 3 jours (poches 500cc)\n• Drain pigtail : clé dans les stups, irrigation 1-2x, relevé toutes 24h\n• Mobilisation drains/lame : LC2R → couper le point sans toucher peau"
+  },
+  {
+    id: 23, name: "Thérapie par Pression Négative (VAC/TPN)", cat: "pansement",
+    summary: "Boîtier éteint 1h avant réfection du pansement",
+    preop: "⚠️ Éteindre le boîtier au moins 1h avant la réfection du pansement pour faciliter son retrait",
+    realim: "N/A",
+    lever: "N/A",
+    surv: "Matériel nécessaire :\n• Set à pansement\n• Compresses stériles (plusieurs paquets)\n• Sérum physiologique\n• Gants stériles\n• Comfeel (plusieurs)\n• Ciseaux stériles\n• Champ stérile\n• Adaptic\n• Kit de changement avec mousse + opsite + système aspiratif\n• Nouveau boîtier\n\nRéfection :\n1. Ouvrir matériel sur champ stérile\n2. Retirer l'ancien pansement\n3. Gants stériles + nettoyer plaie au sérum phy\n4. Placer comfeel sur pourtours\n5. Placer adaptic dans le lit de la plaie\n6. Placer mousse jusqu'au fond\n7. Placer opsite par dessus\n8. Faire trou au centre (taille pièce 2€)\n9. Placer système aspiratif sur l'orifice\n10. Raccorder tubulure pansement au réservoir\n11. Adapter réservoir au boîtier\n12. Allumer VAC → pression sera atteinte"
+  }
+];
+
+let customProtocols = JSON.parse(localStorage.getItem('customProtocols') || '[]');
+let currentTab = 'tous';
+
+function getAllProtocols() {
+  return [...PROTOCOLS, ...customProtocols];
+}
+
+function renderCards() {
+  const search = document.getElementById('searchInput').value.toLowerCase();
+  const grid = document.getElementById('cardsGrid');
+  const all = getAllProtocols();
+  const filtered = all.filter(p => {
+    const matchTab = currentTab === 'tous' || p.cat === currentTab;
+    const matchSearch = p.name.toLowerCase().includes(search) || p.summary.toLowerCase().includes(search);
+    return matchTab && matchSearch;
+  });
+
+  if (filtered.length === 0) {
+    grid.innerHTML = `<div class="empty" style="grid-column:1/-1"><div class="empty-icon">🔍</div><p>Aucun protocole trouvé</p></div>`;
+    return;
+  }
+
+  grid.innerHTML = filtered.map(p => {
+    const tagClass = { digestive: 'tag-digestive', bariatrique: 'tag-bariatrique', pansement: 'tag-pansement', autre: 'tag-autre' }[p.cat] || 'tag-autre';
+    const tagLabel = { digestive: 'Chirurgie digestive', bariatrique: 'Bariatrique', pansement: 'Pansements', autre: 'Autre' }[p.cat] || 'Autre';
+    const isCustom = p.id > 1000;
+    return `<div class="card" onclick="openModal(${p.id})">
+      <div class="card-tag ${tagClass}">${tagLabel}${isCustom ? ' · Personnalisé' : ''}</div>
+      <h3>${p.name}</h3>
+      <p>${p.summary}</p>
+      <span class="card-arrow">›</span>
+    </div>`;
+  }).join('');
+}
+
+function filterTab(tab, el) {
+  currentTab = tab;
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  el.classList.add('active');
+  renderCards();
+}
+
+function filterCards() { renderCards(); }
+
+function openModal(id) {
+  const all = getAllProtocols();
+  const p = all.find(x => x.id === id);
+  if (!p) return;
+  document.getElementById('modalTitle').textContent = p.name;
+  
+  const realimLines = p.realim !== 'N/A' ? p.realim.split('\n').map(l => {
+    const match = l.match(/^(J[-\d+]+):(.*)/);
+    if (match) return `<div><span class="jour">${match[1]}</span>${match[2]}</div>`;
+    return `<div>${l}</div>`;
+  }).join('') : '<div style="color:#7a7268">Non applicable</div>';
+
+  const preopHtml = p.preop !== 'N/A' ? p.preop.split('\n').map(l => `<div>${l}</div>`).join('') : '<div style="color:#7a7268">Non applicable</div>';
+  const survHtml = p.surv.split('\n').map(l => `<div>${l}</div>`).join('');
+
+  document.getElementById('modalBody').innerHTML = `
+    <div class="section-block">
+      <div class="section-block-header block-preop">🗓️ Pré-opératoire / Veille</div>
+      <div class="section-block-body">${preopHtml}</div>
+    </div>
+    <div class="section-block">
+      <div class="section-block-header block-realim">🍽️ Protocole de réalimentation</div>
+      <div class="section-block-body">${realimLines}</div>
+    </div>
+    ${p.lever !== 'N/A' ? `<div class="section-block">
+      <div class="section-block-header block-lever">🚶 1er lever / RAD</div>
+      <div class="section-block-body">${p.lever}</div>
+    </div>` : ''}
+    <div class="section-block">
+      <div class="section-block-header block-surv">👁️ Surveillance AS / Points clés</div>
+      <div class="section-block-body">${survHtml}</div>
+    </div>
+    <p style="font-size:0.75rem;color:#7a7268;margin-top:1rem;text-align:center;">⚠️ Toujours se référer aux prescriptions médicales et consignes du chirurgien</p>
+  `;
+  document.getElementById('modalBg').classList.add('open');
+}
+
+function closeModal(e) {
+  if (e.target === document.getElementById('modalBg')) closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById('modalBg').classList.remove('open');
+}
+
+function toggleAddForm() {
+  document.getElementById('addForm').classList.toggle('open');
+}
+
+function saveProtocol() {
+  const name = document.getElementById('newName').value.trim();
+  if (!name) { alert('Le nom de la pathologie est obligatoire'); return; }
+  const newP = {
+    id: Date.now(),
+    name,
+    cat: document.getElementById('newCat').value,
+    summary: document.getElementById('newSummary').value || 'Protocole personnalisé',
+    preop: document.getElementById('newPreop').value || 'Voir protocole service',
+    realim: document.getElementById('newRealim').value || 'Selon consignes du chir',
+    lever: document.getElementById('newLever').value || 'Selon consignes du chir',
+    surv: document.getElementById('newSurv').value || 'Voir protocole service'
+  };
+  customProtocols.push(newP);
+  localStorage.setItem('customProtocols', JSON.stringify(customProtocols));
+  ['newName','newSummary','newPreop','newRealim','newLever','newSurv'].forEach(id => document.getElementById(id).value = '');
+  document.getElementById('addForm').classList.remove('open');
+  renderCards();
+}
+
+renderCards();
+</script>
+</body>
+</html>
